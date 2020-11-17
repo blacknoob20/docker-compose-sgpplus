@@ -1,0 +1,31 @@
+version: '2.2'
+services:
+  php:
+    container_name: fpm
+    image: php:5.6-fpm-alpine
+    cpuset: '0'
+    mem_limit: 16m
+    volumes:
+      - $PWD/compartido/:/root/
+      - $PWD/apache2/htdocs/:/var/www/html
+    networks:
+      - net
+  sgp:
+    depends_on:
+      - php
+    container_name: plus
+    image: webdevops/apache:alpine-3
+    cpuset: '1'
+    mem_limit: 64m
+    environment:
+      - WEB_PHP_SOCKET=php:9000
+      - WEB_DOCUMENT_ROOT=/var/www/html
+    volumes:
+      - $PWD/compartido/:/root/
+      - $PWD/apache2/htdocs/:/var/www/html
+    ports:
+      - '80:80'
+    networks:
+      - net
+networks:
+  net:
