@@ -1,0 +1,35 @@
+version: '2.2'
+services:
+  php:
+    container_name: fpm
+    image: php5.6:alpine-fpm-oci8
+    cpuset: '0'
+    mem_limit: 16m
+    volumes:
+      - $PWD/:/var/www/html/
+      - $PWD/../php-5.6-fpm/usr/local/etc/php/:/usr/local/etc/php/
+      - $PWD/../php-5.6-fpm/opt/oracle/client/11.2/network/admin/:/opt/oracle/client/11.2/network/admin/
+    networks:
+      - net
+  sgp:
+    depends_on:
+      - php
+    container_name: plus
+    image: webdevops/apache:alpine-3
+    cpuset: '1'
+    mem_limit: 64m
+    environment:
+      - WEB_PHP_SOCKET=php:9000
+      - WEB_DOCUMENT_ROOT=/var/www/html/
+    volumes:
+      - $PWD/:/var/www/html
+      - $PWD/../apache2/etc/apache2/:/etc/apache2/
+      - $PWD/../apache2/var/log/apache2/:/var/log/apache2/
+      - $PWD/../apache2/opt/docker/etc/httpd/:/opt/docker/etc/httpd/
+    ports:
+      - '80:80'
+      - '443:443'
+    networks:
+      - net
+networks:
+  net:
